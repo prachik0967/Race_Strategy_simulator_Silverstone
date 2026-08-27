@@ -1,0 +1,305 @@
+race_laps = 52
+
+base_lap_time = 88.0
+starting_fuel = 105.0
+fuel_per_lap = 1.9
+fuel_time_penalty = 0.035
+
+pit_stop_loss = 19.9
+
+
+TYRES = {
+
+    "soft": {
+        "pace_offset": 0.00,
+        "linear_deg": 0.025,
+        "quadratic_deg": 0.0015
+    },
+
+    "medium": {
+        "pace_offset": 0.45,
+        "linear_deg": 0.018,
+        "quadratic_deg": 0.0009
+    },
+
+    "hard": {
+        "pace_offset": 0.90,
+        "linear_deg": 0.012,
+        "quadratic_deg": 0.0005
+    }
+}
+
+
+# fuel model
+
+def calculate_fuel_mass(lap):
+
+    return max(
+        starting_fuel - (lap - 1) * fuel_per_lap, 0
+    )
+
+# lap time model
+
+def calculate_lap_time(
+    lap,
+    compound,
+    tyre_age
+):
+
+    fuel_penalty = (
+        calculate_fuel_mass(lap)
+        * fuel_time_penalty
+    )
+
+    tyre = TYRES[compound]
+
+    tyre_penalty = (
+        tyre["pace_offset"]
+        + tyre["linear_deg"] * tyre_age
+        + tyre["quadratic_deg"] * tyre_age**2
+    )
+
+    lap_time = (
+        base_lap_time
+        + fuel_penalty
+        + tyre_penalty
+    )
+
+    return lap_time
+
+# stint simulator
+
+def simulate_stint(
+    start_lap,
+    end_lap,
+    compound
+):
+
+    total_time = 0
+    tyre_age = 0
+
+    for lap in range(
+        start_lap,
+        end_lap + 1
+    ):
+
+        lap_time = calculate_lap_time(
+            lap,
+            compound,
+            tyre_age
+        )
+
+        total_time += lap_time
+        tyre_age += 1
+
+    return total_time
+    
+# two stop race simulator
+
+def simulate_two_stop_strategy(
+    compound_1,
+    compound_2,
+    compound_3,
+    pit_1,
+    pit_2
+):
+
+    # First stint:
+    # Lap 1 to first pit stop
+    stint_1_time = simulate_stint(
+        1,
+        pit_1,
+        compound_1
+    )
+
+    # Second stint:
+    # Lap after first stop to second stop
+    stint_2_time = simulate_stint(
+        pit_1 + 1,
+        pit_2,
+        compound_2
+    )
+
+    # Third stint:
+    # Lap after second stop to finish
+    stint_3_time = simulate_stint(
+        pit_2 + 1,
+        race_laps,
+        compound_3
+    )
+
+    total_time = (
+        stint_1_time
+        + stint_2_time
+        + stint_3_time
+        + 2 * pit_stop_loss
+    )
+
+    return total_time
+
+
+# example manaul two stop strategy
+
+example_race_time = (
+    simulate_two_stop_strategy(
+        "soft",
+        "medium",
+        "hard",
+        15,
+        34
+    )
+)
+
+print()
+print("example two stop strategy")
+
+print("Strategy: Soft -> Medium -> Hard")
+print("Pit Stop 1: Lap 15")
+print("Pit Stop 2: Lap 34")
+
+print(
+    f"Race Time: "
+    f"{example_race_time:.3f} seconds"
+)
+
+# two stop optimiser
+
+def optimise_two_stop():
+
+    compounds = [
+        "soft",
+        "medium",
+        "hard"
+    ]
+
+    best_time = float("inf")
+    best_strategy = None
+
+    results = []
+
+    
+    # search tyre compound combinations
+
+    for compound_1 in compounds:
+
+        for compound_2 in compounds:
+
+            for compound_3 in compounds:
+
+                # compound use rule
+                # At least two different compounds
+                # must be used during the race.
+                # This excludes strategies such as:
+                # Soft -> Soft -> Soft
+                # Medium -> Medium -> Medium
+                # Hard -> Hard -> Hard
+
+                unique_compounds = {
+                    compound_1,
+                    compound_2,
+                    compound_3
+                }
+
+                if len(unique_compounds) < 2:
+                    continue
+
+                # search first pit stop lap
+
+                for pit_1 in range(
+                    5,
+                    race_laps - 10
+                ):
+
+                    # search second pit stop lap
+                    # Second stop must occur at least
+                    # five laps after the first stop.
+
+                    for pit_2 in range(
+                        pit_1 + 5,
+                        race_laps - 4
+                    ):
+
+                        race_time = (
+                            simulate_two_stop_strategy(
+                                compound_1,
+                                compound_2,
+                                compound_3,
+                                pit_1,
+                                pit_2
+                            )
+                        )
+
+                        result = {
+
+                            "compound_1":
+                                compound_1,
+
+                            "compound_2":
+                                compound_2,
+
+                            "compound_3":
+                                compound_3,
+
+                            "pit_1":
+                                pit_1,
+
+                            "pit_2":
+                                pit_2,
+
+                            "race_time":
+                                race_time
+                        }
+
+                        results.append(
+                            result
+                        )
+
+                        # check for new best strategy
+
+                        if race_time < best_time:
+
+                            best_time = race_time
+                            best_strategy = result
+
+    return (
+        best_strategy,
+        results
+    )
+
+# run optimisation
+
+best_strategy, results = (
+    optimise_two_stop()
+)
+
+
+# display best result
+# rank two stop strategies
+
+sorted_results = sorted(
+    results,
+    key=lambda result: result["race_time"]
+)
+
+
+print()
+print("top 10 two stop strategies")
+
+for position, result in enumerate(
+    sorted_results[:10],
+    start=1
+):
+
+    print(
+        f"{position:2d}. "
+        f"{result['compound_1'].capitalize()}"
+        f" -> "
+        f"{result['compound_2'].capitalize()}"
+        f" -> "
+        f"{result['compound_3'].capitalize()}"
+        f" | Pit Laps "
+        f"{result['pit_1']} and "
+        f"{result['pit_2']}"
+        f" | Race Time "
+        f"{result['race_time']:.3f} s"
+    )
