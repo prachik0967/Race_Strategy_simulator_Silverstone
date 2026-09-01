@@ -41,7 +41,7 @@ TYRES = {
 }
 
 print("Silverstone Modelling Parameters")
-print("-----------------------------")
+print()
 
 print(f"Circuit: {circuit_name}")
 print(f"Race laps: {race_laps}")
