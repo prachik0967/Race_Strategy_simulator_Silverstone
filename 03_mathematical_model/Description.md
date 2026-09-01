@@ -40,8 +40,6 @@ where:
 - k_f = fuel sensitivity coefficient
 - m_f = current fuel mass
 
----
-
 # Tyre Model
 
 Three compounds are used to model tyre performance:
