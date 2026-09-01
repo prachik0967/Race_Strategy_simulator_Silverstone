@@ -1,4 +1,5 @@
 # Parameters need to be declared
+# all numbers were obtained from the officail F1 website
 
 circuit_name = "Silverstone Grand Prix Circuit"
 circuit_length = 5.891 # this length is in km
