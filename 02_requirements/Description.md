@@ -2,9 +2,9 @@
 
 # Functional Requirements
 
-The simulator ideally should:
+The simulator ideally should be able to do this:
 
-- Model a 52-lap race around Silverstone
+- Model a 52 lap race around Silverstone
 - Model Soft, Medium and Hard tyre compounds
 - Calculate fuel mass for each lap
 - Calculate tyre degradation as tyre age increases
@@ -12,13 +12,11 @@ The simulator ideally should:
 - Simulate complete tyre stints
 - Simulate one-stop race strategies
 - Simulate two-stop race strategies
-- Include pit-stop time losses
+- Include pit stop time losses
 - Compare different race strategies
 - Identify the strategy with the minimum simulated race time
 
 # Modelling Requirements
-
-The mathematical model should:
 
 - Account for the effect of fuel mass on lap time
 - Reduce fuel mass as the race progresses
@@ -78,7 +76,7 @@ The first version will not include:
 
 - Weather complications
 - Safety Car or Virtual Safety Car scenarios
-- Traffic (blue flags or lap one racing)
+- Traffic (blue flags or lap one racing incidents)
 - Overtaking
 - Tyre temperature
 - Detailed vehicle dynamics
