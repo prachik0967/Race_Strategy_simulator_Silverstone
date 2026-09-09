@@ -215,5 +215,5 @@ print(
 # end
 
 print()
-print(" SIMULATION COMPLETED!!")
+print(" Simulation Completed!!")
 print()
