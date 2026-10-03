@@ -2,7 +2,7 @@
 # Predict one lap's time from a reference time, fuel loads and tyre condition
 # All time values and calculated penalites are in seconds
 
-# def creates a reusable variable
+# def creates a reusable function
 def calculate_lap_time(
     base_lap_time, # Reference lap time at zero modelled fuel penalty and zero tyre offset/degradation (s)
     fuel_mass, # Fuel carried on the lap (kg)
