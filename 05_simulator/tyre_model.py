@@ -19,33 +19,34 @@ TYRES = {
     }
 }
 
-# Calculate the lap-time penalty caused by tyre compound and tyre degradation.
-
+# Calculate the lap-time penalty caused by tyre compound and tyre degradation
 def calculate_tyre_penalty(
     compound,
     tyre_age
 ):
-
-  
     tyre = TYRES[compound]
 
+    # Calculate the time lost through wear.
+    # The linear term grows steadily
+    # The squared term makes the penalty grow increasingly quickly as the tyres get older
     degradation = (
         tyre["linear_deg"] * tyre_age
         + tyre["quadratic_deg"] * tyre_age**2
     )
 
+    # Add the compound's fresh tyre pace deficit to the wear penalty
     tyre_penalty = (
         tyre["pace_offset"]
         + degradation
     )
 
+    # Return only the tyre contribution, not the complete lap time
     return tyre_penalty
 
 
 # Example checks
 
 print("Tyre model checks")
-print("----------------")
 
 print(
     "Fresh Soft:",
